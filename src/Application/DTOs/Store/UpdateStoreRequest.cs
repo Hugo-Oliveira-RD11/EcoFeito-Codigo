@@ -1,0 +1,8 @@
+namespace Application.DTOs.Store;
+
+public class UpdateStoreRequest
+{
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public string LogoUrl { get; set; }
+}
