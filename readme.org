@@ -1,0 +1,888 @@
+#+TITLE: API Endpoints Documentation
+#+AUTHOR: Hugo de Oliveira Resende
+#+DATE: 2025-11-09
+#+VERSION: 1.0
+
+* Table of Contents
+  - [[*Authentication][Authentication]]
+  - [[*Users][Users]]
+  - [[*Products][Products]]
+  - [[*Categories][Categories]]
+  - [[*Store][Store]]
+  - [[*Cart][Cart]]
+  - [[*Orders][Orders]]
+  - [[*Reviews & Ratings][Reviews & Ratings]]
+  - [[*Admin][Admin]]
+  - [[*Error Responses][Error Responses]]
+  - [[*Status Codes Summary][Status Codes Summary]]
+
+* Authentication
+** Register User
+   - Endpoint: =POST /api/auth/register=
+   - Description: Register new user (Customer, Seller, or Admin)
+   - Headers: None
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "role": "Customer",
+  "firstName": "João",
+  "lastName": "Silva",
+  "storeName": "Minha Loja",
+  "description": "Descrição da loja"
+}
+     #+END_SRC
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "userId": "507f1f77bcf86cd799439011",
+  "email": "user@example.com",
+  "role": "Customer"
+}
+     #+END_SRC
+   - Error Responses:
+     - 400: ={"error": "Email already exists"}=
+     - 400: ={"error": "Validation failed", "errors": {...}}=
+
+** Login
+   - Endpoint: =POST /api/auth/login=
+   - Description: Authenticate user and return JWT token
+   - Headers: None
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+     #+END_SRC
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "email": "user@example.com",
+  "role": "Customer",
+  "userId": "507f1f77bcf86cd799439011",
+  "expiresAt": "2024-01-15T10:30:00Z"
+}
+     #+END_SRC
+   - Error Responses:
+     - 401: ={"error": "Invalid credentials"}=
+     - 401: ={"error": "Account is deactivated"}=
+
+** Logout
+   - Endpoint: =POST /api/auth/logout=
+   - Description: Invalidate user token (client-side cleanup)
+   - Headers: =Authorization: Bearer {token}=
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "success": true,
+  "message": "Logged out successfully"
+}
+     #+END_SRC
+
+** Change Password
+   - Endpoint: =PUT /api/auth/change-password=
+   - Description: Change user password
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "currentPassword": "oldpassword123",
+  "newPassword": "newpassword456"
+}
+     #+END_SRC
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "success": true,
+  "message": "Password changed successfully"
+}
+     #+END_SRC
+   - Error Responses:
+     - 400: ={"error": "Current password is incorrect"}=
+     - 400: ={"error": "New password must be different"}=
+
+** Forgot Password
+   - Endpoint: =POST /api/auth/forgot-password=
+   - Description: Request password reset email
+   - Headers: None
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "email": "user@example.com"
+}
+     #+END_SRC
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "success": true,
+  "message": "Password reset email sent"
+}
+     #+END_SRC
+
+** Reset Password
+   - Endpoint: =POST /api/auth/reset-password=
+   - Description: Reset password with token
+   - Headers: None
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "token": "reset-token-here",
+  "newPassword": "newpassword456"
+}
+     #+END_SRC
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "success": true,
+  "message": "Password reset successfully"
+}
+     #+END_SRC
+
+* Users
+** Get User Profile
+   - Endpoint: =GET /api/users/{id}=
+   - Description: Get user profile information
+   - Headers: =Authorization: Bearer {token}=
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "id": "507f1f77bcf86cd799439011",
+  "email": "user@example.com",
+  "role": "Customer",
+  "isActive": true,
+  "createdAt": "2024-01-01T10:00:00Z",
+  "customerProfile": {
+    "firstName": "João",
+    "lastName": "Silva",
+    "phone": "+5511999999999",
+    "address": "Rua Example, 123",
+    "dateOfBirth": "1990-01-01",
+    "profileImage": "https://example.com/profile.jpg"
+  },
+  "sellerProfile": {
+    "storeName": "Tech Store",
+    "description": "Loja de eletrônicos",
+    "contactEmail": "contato@techstore.com",
+    "phone": "+5511888888888",
+    "businessDocument": "12.345.678/0001-90",
+    "storeCategory": "Eletrônicos",
+    "yearsInBusiness": 5,
+    "website": "https://techstore.com",
+    "socialMedia": {
+      "instagram": "@techstore",
+      "facebook": "techstore"
+    }
+  }
+}
+     #+END_SRC
+
+** Update User Profile
+   - Endpoint: =PUT /api/users/{id}=
+   - Description: Update user profile information
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "email": "novoemail@example.com",
+  "firstName": "João",
+  "lastName": "Santos",
+  "phone": "+5511988888888",
+  "address": "Nova Rua, 456",
+  "dateOfBirth": "1990-01-01",
+  "profileImage": "https://example.com/new-profile.jpg"
+}
+     #+END_SRC
+   - Success Response (200): Same as GET
+
+** Update Seller Profile
+   - Endpoint: =PUT /api/users/{id}/seller-profile=
+   - Description: Update seller-specific profile information
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "storeName": "Nova Tech Store",
+  "description": "Nova descrição da loja",
+  "contactEmail": "novo@techstore.com",
+  "phone": "+5511877777777",
+  "businessDocument": "98.765.432/0001-10",
+  "storeCategory": "Tecnologia",
+  "yearsInBusiness": 6,
+  "website": "https://novatechstore.com",
+  "socialMedia": {
+    "instagram": "@novatechstore",
+    "facebook": "novatechstore",
+    "twitter": "@novatechstore"
+  }
+}
+     #+END_SRC
+   - Success Response (200): Same as GET
+
+* Products
+** Search Products
+   - Endpoint: =GET /api/products=
+   - Description: Search and filter products
+   - Query Parameters:
+     - =search=: string (optional)
+     - =categoryId=: string (optional)
+     - =minPrice=: number (optional)
+     - =maxPrice=: number (optional)
+     - =sellerId=: string (optional)
+     - =sortBy=: string (optional) - "price_asc", "price_desc", "rating", "newest"
+     - =page=: number (optional, default: 1)
+     - =pageSize=: number (optional, default: 20)
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "products": [
+    {
+      "id": "507f1f77bcf86cd799439012",
+      "name": "Smartphone XYZ",
+      "description": "Smartphone avançado com 128GB",
+      "price": 1299.99,
+      "originalPrice": 1499.99,
+      "stockQuantity": 50,
+      "sellerProfileId": "507f1f77bcf86cd799439013",
+      "categoryId": "507f1f77bcf86cd799439014",
+      "isActive": true,
+      "imageUrl": "https://example.com/image1.jpg",
+      "additionalImages": [
+        "https://example.com/image2.jpg",
+        "https://example.com/image3.jpg"
+      ],
+      "createdAt": "2024-01-01T10:00:00Z",
+      "sellerName": "Tech Store",
+      "categoryName": "Eletrônicos",
+      "averageRating": 4.5,
+      "reviewCount": 25,
+      "tags": ["smartphone", "tecnologia", "android"],
+      "specifications": {
+        "storage": "128GB",
+        "ram": "8GB",
+        "screen": "6.5 inches"
+      },
+      "warranty": "12 meses",
+      "shippingInfo": "Entrega grátis"
+    }
+  ],
+  "totalCount": 150,
+  "page": 1,
+  "totalPages": 8,
+  "filters": {
+    "categories": [
+      {"id": "cat1", "name": "Eletrônicos", "count": 50},
+      {"id": "cat2", "name": "Roupas", "count": 30}
+    ],
+    "priceRange": {"min": 10, "max": 5000}
+  }
+}
+     #+END_SRC
+
+** Get Product Details
+   - Endpoint: =GET /api/products/{id}=
+   - Description: Get detailed product information
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "id": "507f1f77bcf86cd799439012",
+  "name": "Smartphone XYZ",
+  "description": "Smartphone avançado com 128GB...",
+  "price": 1299.99,
+  "originalPrice": 1499.99,
+  "stockQuantity": 50,
+  "sellerProfileId": "507f1f77bcf86cd799439013",
+  "categoryId": "507f1f77bcf86cd799439014",
+  "isActive": true,
+  "imageUrl": "https://example.com/image1.jpg",
+  "additionalImages": [
+    "https://example.com/image2.jpg",
+    "https://example.com/image3.jpg"
+  ],
+  "createdAt": "2024-01-01T10:00:00Z",
+  "sellerInfo": {
+    "storeName": "Tech Store",
+    "sellerRating": 4.7,
+    "totalSales": 1500
+  },
+  "categoryName": "Eletrônicos",
+  "averageRating": 4.5,
+  "reviewCount": 25,
+  "tags": ["smartphone", "tecnologia", "android"],
+  "specifications": {
+    "storage": "128GB",
+    "ram": "8GB",
+    "screen": "6.5 inches",
+    "camera": "48MP + 12MP",
+    "battery": "5000mAh"
+  },
+  "warranty": "12 meses",
+  "shippingInfo": "Entrega grátis",
+  "returnPolicy": "30 dias para devolução"
+}
+     #+END_SRC
+
+** Create Product
+   - Endpoint: =POST /api/products=
+   - Description: Create new product (Seller/Admin only)
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "name": "Novo Produto",
+  "description": "Descrição do novo produto",
+  "price": 99.99,
+  "originalPrice": 129.99,
+  "stockQuantity": 100,
+  "categoryId": "507f1f77bcf86cd799439014",
+  "imageUrls": [
+    "https://example.com/main.jpg",
+    "https://example.com/image2.jpg"
+  ],
+  "tags": ["novo", "promoção"],
+  "specifications": {
+    "material": "Alumínio",
+    "cor": "Preto"
+  },
+  "warranty": "6 meses",
+  "shippingInfo": "Entrega em 5 dias úteis",
+  "returnPolicy": "30 dias"
+}
+     #+END_SRC
+   - Success Response (201): Product details
+
+** Update Product
+   - Endpoint: =PUT /api/products/{id}=
+   - Description: Update product information
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body: Same as create (all fields optional)
+   - Success Response (200): Updated product details
+
+** Delete Product
+   - Endpoint: =DELETE /api/products/{id}=
+   - Description: Deactivate product
+   - Headers: =Authorization: Bearer {token}=
+   - Success Response (204): No content
+
+** Get Seller Products
+   - Endpoint: =GET /api/products/seller/my-products=
+   - Description: Get products for logged-in seller
+   - Headers: =Authorization: Bearer {token}=
+   - Query Parameters: =page=, =pageSize=, =status= (active/inactive)
+   - Success Response (200): Same as search but with seller's products only
+
+* Categories
+** Get Categories
+   - Endpoint: =GET /api/categories=
+   - Description: Get all product categories
+   - Success Response (200):
+     #+BEGIN_SRC json
+[
+  {
+    "id": "507f1f77bcf86cd799439014",
+    "name": "Eletrônicos",
+    "description": "Produtos eletrônicos em geral",
+    "imageUrl": "https://example.com/eletronicos.jpg",
+    "productCount": 150,
+    "subcategories": [
+      {"id": "sub1", "name": "Smartphones", "productCount": 50},
+      {"id": "sub2", "name": "Computadores", "productCount": 30}
+    ]
+  }
+]
+     #+END_SRC
+
+** Create Category
+   - Endpoint: =POST /api/categories=
+   - Description: Create new category (Admin only)
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "name": "Roupas",
+  "description": "Roupas e acessórios",
+  "imageUrl": "https://example.com/roupas.jpg",
+  "parentCategoryId": "optional-parent-id"
+}
+     #+END_SRC
+   - Success Response (201): Category details
+
+* Store
+** Get Store Profile
+   - Endpoint: =GET /api/store/{sellerProfileId}=
+   - Description: Get store profile and statistics
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "id": "507f1f77bcf86cd799439017",
+  "name": "Tech Store",
+  "description": "Loja de produtos eletrônicos",
+  "logoUrl": "https://example.com/logo.jpg",
+  "bannerUrl": "https://example.com/banner.jpg",
+  "rating": 4.7,
+  "totalSales": 1500,
+  "totalReviews": 300,
+  "sellerProfileId": "507f1f77bcf86cd799439013",
+  "sellerEmail": "seller@example.com",
+  "productCount": 25,
+  "createdAt": "2024-01-01T10:00:00Z",
+  "contactInfo": {
+    "phone": "+5511888888888",
+    "email": "contato@techstore.com",
+    "website": "https://techstore.com"
+  },
+  "socialMedia": {
+    "instagram": "@techstore",
+    "facebook": "techstore"
+  },
+  "businessHours": {
+    "monday": "09:00-18:00",
+    "tuesday": "09:00-18:00",
+    "saturday": "10:00-14:00",
+    "sunday": "Fechado"
+  }
+}
+     #+END_SRC
+
+** Get Store Products
+   - Endpoint: =GET /api/store/{sellerProfileId}/products=
+   - Description: Get products from specific store
+   - Query Parameters: =page=, =pageSize=, =sortBy=
+   - Success Response (200): Same as product search
+
+** Update Store Profile
+   - Endpoint: =PUT /api/store/{sellerProfileId}=
+   - Description: Update store information
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "name": "Nova Tech Store",
+  "description": "Nova descrição",
+  "logoUrl": "https://example.com/new-logo.jpg",
+  "bannerUrl": "https://example.com/new-banner.jpg",
+  "contactInfo": {
+    "phone": "+5511877777777",
+    "email": "novo@techstore.com",
+    "website": "https://novatechstore.com"
+  },
+  "socialMedia": {
+    "instagram": "@novatechstore",
+    "facebook": "novatechstore"
+  },
+  "businessHours": {
+    "monday": "08:00-17:00",
+    "saturday": "09:00-13:00"
+  }
+}
+     #+END_SRC
+   - Success Response (200): Updated store profile
+
+* Cart
+** Get Cart
+   - Endpoint: =GET /api/cart=
+   - Description: Get user's shopping cart
+   - Headers: =Authorization: Bearer {token}=
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "id": "507f1f77bcf86cd799439018",
+  "customerProfileId": "507f1f77bcf86cd799439019",
+  "items": [
+    {
+      "id": "507f1f77bcf86cd799439020",
+      "productId": "507f1f77bcf86cd799439012",
+      "productName": "Smartphone XYZ",
+      "unitPrice": 1299.99,
+      "originalPrice": 1499.99,
+      "quantity": 2,
+      "totalPrice": 2599.98,
+      "imageUrl": "https://example.com/image1.jpg",
+      "stockAvailable": 50,
+      "isActive": true
+    }
+  ],
+  "totalAmount": 2599.98,
+  "totalItems": 2,
+  "discountAmount": 100.00,
+  "shippingAmount": 15.00,
+  "finalAmount": 2514.98
+}
+     #+END_SRC
+
+** Add to Cart
+   - Endpoint: =POST /api/cart/items=
+   - Description: Add item to cart
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "productId": "507f1f77bcf86cd799439012",
+  "quantity": 1
+}
+     #+END_SRC
+   - Success Response (200): Updated cart
+
+** Update Cart Item
+   - Endpoint: =PUT /api/cart/items/{productId}=
+   - Description: Update item quantity
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "quantity": 3
+}
+     #+END_SRC
+   - Success Response (200): Updated cart
+
+** Remove from Cart
+   - Endpoint: =DELETE /api/cart/items/{productId}=
+   - Description: Remove item from cart
+   - Headers: =Authorization: Bearer {token}=
+   - Success Response (200): Updated cart
+
+** Clear Cart
+   - Endpoint: =DELETE /api/cart=
+   - Description: Clear all items from cart
+   - Headers: =Authorization: Bearer {token}=
+   - Success Response (204): No content
+
+* Orders
+** Create Order
+   - Endpoint: =POST /api/orders=
+   - Description: Create order from cart
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "shippingAddress": {
+    "street": "Rua Example, 123",
+    "city": "São Paulo",
+    "state": "SP",
+    "zipCode": "01234-567",
+    "country": "Brazil"
+  },
+  "billingAddress": {
+    "sameAsShipping": true,
+    "street": "Rua Billing, 456",
+    "city": "São Paulo",
+    "state": "SP",
+    "zipCode": "01234-567",
+    "country": "Brazil"
+  },
+  "paymentMethod": "credit_card",
+  "shippingMethod": "standard"
+}
+     #+END_SRC
+   - Success Response (201):
+     #+BEGIN_SRC json
+{
+  "id": "507f1f77bcf86cd799439021",
+  "orderNumber": "ORD-2024-001",
+  "customerProfileId": "507f1f77bcf86cd799439019",
+  "customerName": "João Silva",
+  "customerEmail": "joao@example.com",
+  "totalAmount": 2599.98,
+  "status": "pending",
+  "shippingAddress": {
+    "street": "Rua Example, 123",
+    "city": "São Paulo",
+    "state": "SP",
+    "zipCode": "01234-567",
+    "country": "Brazil"
+  },
+  "items": [
+    {
+      "id": "507f1f77bcf86cd799439022",
+      "productId": "507f1f77bcf86cd799439012",
+      "productName": "Smartphone XYZ",
+      "quantity": 2,
+      "unitPrice": 1299.99,
+      "totalPrice": 2599.98
+    }
+  ],
+  "paymentInfo": {
+    "method": "credit_card",
+    "status": "pending"
+  },
+  "shippingInfo": {
+    "method": "standard",
+    "cost": 15.00,
+    "estimatedDays": "5-7"
+  },
+  "createdAt": "2024-01-01T10:00:00Z",
+  "updatedAt": null
+}
+     #+END_SRC
+
+** Get Orders
+   - Endpoint: =GET /api/orders=
+   - Description: Get user's orders (Customer sees their orders, Seller sees store orders)
+   - Headers: =Authorization: Bearer {token}=
+   - Query Parameters: =page=, =pageSize=, =status=, =startDate=, =endDate=
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "orders": [
+    {
+      "id": "507f1f77bcf86cd799439021",
+      "orderNumber": "ORD-2024-001",
+      "customerName": "João Silva",
+      "totalAmount": 2599.98,
+      "status": "completed",
+      "itemCount": 2,
+      "createdAt": "2024-01-01T10:00:00Z",
+      "updatedAt": "2024-01-02T15:30:00Z"
+    }
+  ],
+  "totalCount": 15,
+  "page": 1,
+  "totalPages": 2
+}
+     #+END_SRC
+
+** Get Order Details
+   - Endpoint: =GET /api/orders/{id}=
+   - Description: Get detailed order information
+   - Headers: =Authorization: Bearer {token}=
+   - Success Response (200): Full order details
+
+** Update Order Status
+   - Endpoint: =PUT /api/orders/{id}/status=
+   - Description: Update order status (Seller/Admin only)
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "status": "shipped",
+  "trackingNumber": "TRK123456789"
+}
+     #+END_SRC
+   - Success Response (200): Updated order
+
+** Cancel Order
+   - Endpoint: =POST /api/orders/{id}/cancel=
+   - Description: Cancel order (Customer) or reject order (Seller)
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "reason": "Changed my mind"
+}
+     #+END_SRC
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "success": true,
+  "message": "Order cancelled successfully"
+}
+     #+END_SRC
+
+* Reviews & Ratings
+** Create Product Review
+   - Endpoint: =POST /api/products/{id}/reviews=
+   - Description: Add review and rating for product
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "rating": 5,
+  "title": "Excelente produto!",
+  "comment": "Superou minhas expectativas...",
+  "recommend": true
+}
+     #+END_SRC
+   - Success Response (201):
+     #+BEGIN_SRC json
+{
+  "id": "rev123456789",
+  "productId": "507f1f77bcf86cd799439012",
+  "customerName": "João Silva",
+  "rating": 5,
+  "title": "Excelente produto!",
+  "comment": "Superou minhas expectativas...",
+  "recommend": true,
+  "createdAt": "2024-01-01T10:00:00Z"
+}
+     #+END_SRC
+
+** Get Product Reviews
+   - Endpoint: =GET /api/products/{id}/reviews=
+   - Description: Get reviews for a product
+   - Query Parameters: =page=, =pageSize=, =sortBy= (newest, highest, lowest)
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "reviews": [
+    {
+      "id": "rev123456789",
+      "customerName": "João Silva",
+      "rating": 5,
+      "title": "Excelente produto!",
+      "comment": "Superou minhas expectativas...",
+      "recommend": true,
+      "createdAt": "2024-01-01T10:00:00Z",
+      "helpful": 15
+    }
+  ],
+  "averageRating": 4.5,
+  "totalReviews": 25,
+  "ratingDistribution": {
+    "5": 15,
+    "4": 7,
+    "3": 2,
+    "2": 1,
+    "1": 0
+  }
+}
+     #+END_SRC
+
+** Create Store Review
+   - Endpoint: =POST /api/store/{sellerProfileId}/reviews=
+   - Description: Add review and rating for store
+   - Headers: =Authorization: Bearer {token}=
+   - Request Body: Same as product review
+   - Success Response (201): Review details
+
+** Get Store Reviews
+   - Endpoint: =GET /api/store/{sellerProfileId}/reviews=
+   - Description: Get reviews for a store
+   - Query Parameters: Same as product reviews
+   - Success Response (200): Same format as product reviews
+
+** Helpful Review
+   - Endpoint: =POST /api/reviews/{id}/helpful=
+   - Description: Mark review as helpful
+   - Headers: =Authorization: Bearer {token}=
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "success": true,
+  "helpfulCount": 16
+}
+     #+END_SRC
+
+* Admin
+** Get Dashboard Stats
+   - Endpoint: =GET /api/admin/dashboard=
+   - Description: Get admin dashboard statistics
+   - Headers: =Authorization: Bearer {token}= (Admin only)
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "totalUsers": 1500,
+  "totalSellers": 250,
+  "totalProducts": 5000,
+  "totalOrders": 12000,
+  "totalRevenue": 250000.00,
+  "recentOrders": 45,
+  "pendingReviews": 12,
+  "salesData": {
+    "today": 1500.00,
+    "thisWeek": 25000.00,
+    "thisMonth": 100000.00
+  },
+  "topProducts": [
+    {"id": "prod1", "name": "Product A", "sales": 150},
+    {"id": "prod2", "name": "Product B", "sales": 120}
+  ]
+}
+     #+END_SRC
+
+** Get Users List
+   - Endpoint: =GET /api/admin/users=
+   - Description: Get paginated users list
+   - Headers: =Authorization: Bearer {token}= (Admin only)
+   - Query Parameters: =page=, =pageSize=, =role=, =search=
+   - Success Response (200):
+     #+BEGIN_SRC json
+{
+  "users": [
+    {
+      "id": "user123",
+      "email": "user@example.com",
+      "role": "Customer",
+      "isActive": true,
+      "createdAt": "2024-01-01T10:00:00Z",
+      "lastLogin": "2024-01-15T08:30:00Z"
+    }
+  ],
+  "totalCount": 1500,
+  "page": 1,
+  "totalPages": 150
+}
+     #+END_SRC
+
+** Manage User
+   - Endpoint: =PUT /api/admin/users/{id}=
+   - Description: Update user status or role
+   - Headers: =Authorization: Bearer {token}= (Admin only)
+   - Request Body:
+     #+BEGIN_SRC json
+{
+  "isActive": false,
+  "role": "Seller"
+}
+     #+END_SRC
+   - Success Response (200): Updated user
+
+* Error Responses
+  All endpoints return errors in consistent format:
+
+  - *400 Bad Request*:
+    #+BEGIN_SRC json
+{
+  "error": "Validation failed",
+  "errors": {
+    "email": ["Email is required", "Invalid email format"]
+  }
+}
+    #+END_SRC
+
+  - *401 Unauthorized*:
+    #+BEGIN_SRC json
+{
+  "error": "Invalid token"
+}
+    #+END_SRC
+
+  - *403 Forbidden*:
+    #+BEGIN_SRC json
+{
+  "error": "Insufficient permissions"
+}
+    #+END_SRC
+
+  - *404 Not Found*:
+    #+BEGIN_SRC json
+{
+  "error": "Resource not found"
+}
+    #+END_SRC
+
+  - *500 Internal Server Error*:
+    #+BEGIN_SRC json
+{
+  "error": "An unexpected error occurred"
+}
+    #+END_SRC
+
+* Status Codes Summary
+  - 200: Success
+  - 201: Created successfully
+  - 204: Success no content
+  - 400: Bad request / validation error
+  - 401: Unauthorized
+  - 403: Forbidden
+  - 404: Not found
+  - 500: Internal server error
+
+* Notes
+  - All dates are in ISO 8601 format
+  - All prices are in decimal format with 2 decimal places
+  - Pagination uses 1-based indexing
+  - JWT tokens expire in 24 hours
+  - Image URLs should be absolute URLs
+  - Currency: BRL (Brazilian Real)

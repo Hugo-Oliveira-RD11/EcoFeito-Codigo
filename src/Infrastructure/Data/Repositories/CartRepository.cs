@@ -7,8 +7,10 @@ namespace Infrastructure.Data.Repositories;
 
 public class CartRepository : BaseRepository<Cart>, ICartRepository
 {
-    public CartRepository(MongoDbContext context) : base(context.Carts)
+  private MongoDbContext context;
+    public CartRepository(MongoDbContext _context) : base(_context.Carts)
     {
+      context = _context;
     }
 
     public async Task<Cart> GetByCustomerAsync(string customerProfileId)

@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace Infrastructure.Data.Repositories;
 
-public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
+public partial class CategoryRepository : BaseRepository<Category>, ICategoryRepository
 {
     public CategoryRepository(MongoDbContext context) : base(context.Categories)
     {

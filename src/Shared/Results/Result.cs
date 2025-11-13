@@ -35,4 +35,4 @@ public class Result
 
     public static Result Success() => new Result(true, string.Empty, 200);
     public static Result Failure(string error, int statusCode = 400) => new Result(false, error, statusCode);
-}s
+}
