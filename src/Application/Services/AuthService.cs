@@ -3,6 +3,9 @@ using Application.DTOs.Auth;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Interfaces;
+
+using Microsoft.Extensions.Logging;
+
 using Shared.Results;
 
 namespace Application.Services;

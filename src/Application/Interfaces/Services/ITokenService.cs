@@ -1,3 +1,4 @@
+//TODO Passar isso para Domain
 using Domain.Entities;
 
 namespace Application.Interfaces.Services;

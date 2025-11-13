@@ -5,6 +5,7 @@ using Application.Interfaces.Services;
 using Application.Mappers;
 using Domain.Interfaces;
 using Shared.Results;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
 

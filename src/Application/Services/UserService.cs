@@ -3,6 +3,9 @@ using Application.DTOs.Users;
 using Application.Interfaces.Services;
 using Application.Mappers;
 using Domain.Interfaces;
+
+using Microsoft.Extensions.Logging;
+
 using Shared.Results;
 
 namespace Application.Services;

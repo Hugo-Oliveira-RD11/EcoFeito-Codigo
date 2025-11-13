@@ -5,7 +5,9 @@ public class CustomerProfile : BaseEntity
     public string UserId { get; private set; }
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
+    //TODO Separa para uma tabelo diferente - Telefone
     public string? Phone { get; private set; }
+    //TODO Separa para uma tabelo diferente - Endereço
     public string? Address { get; private set; }
 
     // Navigation properties

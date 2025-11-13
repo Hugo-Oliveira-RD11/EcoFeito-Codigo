@@ -8,8 +8,8 @@ public class User : BaseEntity
     public bool IsActive { get; private set; } = true;
 
     // Navigation properties
-    public SellerProfile? SellerProfile { get; private set; }
-    public CustomerProfile? CustomerProfile { get; private set; }
+    public SellerProfile? SellerProfile { get;  set; }
+    public CustomerProfile? CustomerProfile { get;  set; }
 
     private User() { } // For EF
 
