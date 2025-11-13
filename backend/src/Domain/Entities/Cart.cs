@@ -1,4 +1,5 @@
 namespace Domain.Entities;
+//TODO falta um a soma de todos os valores
 
 public class Cart : BaseEntity
 {
@@ -33,6 +34,7 @@ public class Cart : BaseEntity
     public void RemoveItem(string productId)
     {
         var item = Items.FirstOrDefault(i => i.ProductId == productId);
+        //TODO Verificação errada
         if (item != null)
         {
             Items.Remove(item);

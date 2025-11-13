@@ -1,5 +1,5 @@
 namespace Domain.Entities;
-
+//TODO falta um value
 public class CartItem : BaseEntity
 {
     public string CartId { get; private set; }
